@@ -4,9 +4,9 @@ import PositionObserver from "../src";
 
 const vm = new WeakMap();
 
-class Test extends React.PureComponent {
+class Test extends React.Component {
 
-    state = {};
+    state = {entry:{}};
     ref = React.createRef<HTMLDivElement>();
     ref2 = React.createRef<HTMLDivElement>();
 
@@ -16,11 +16,12 @@ class Test extends React.PureComponent {
     componentDidMount() {
         const observe = new PositionObserver((entries) => {
             entries.map((entry) => {
-                vm.set(entry.target, entry.boundingClientRect)
+                vm.set(entry.target, entry)
             });
-            const boundingClientRect = vm.get(this.ref.current)
+            const entry = vm.get(this.ref.current)
+            //console.log(entry);
             this.setState({
-                boundingClientRect,
+                entry
             })
         })
         observe.observe(this.ref.current);
@@ -40,27 +41,37 @@ class Test extends React.PureComponent {
      *
      */
     render() {
-        const boundingClientRect = this.state.boundingClientRect;
-        console.log(boundingClientRect);
+        const {boundingClientRect,intersectionRect} = this.state.entry;
+
+        if(boundingClientRect && intersectionRect){
+            console.log('width',intersectionRect,intersectionRect?.width);
+        }
         return (
             <div style={{height: 800, width: 500, marginTop: 200, overflow: 'auto', border: '1px solid red'}}>
-                <div ref={this.ref2}>123</div>
+                <div ref={this.ref2} style={{height:900}}>123</div>
                 <div id={'ww'} style={{overflow: 'scroll'}}>
                     <div ref={this.ref} style={{overflow: 'inherit', width: 300, border: '1px solid'}}>
 
                     </div>
                 </div>
                 {
-                    boundingClientRect && createPortal(
+                    boundingClientRect && intersectionRect && createPortal(
                         <div style={{
                             position: 'fixed',
-                            left:boundingClientRect.x,
-                            top: boundingClientRect.y,
-                            width:boundingClientRect.width-2,
-                            height: boundingClientRect.height-2,
-                            border:'1px solid'
+                            left:intersectionRect.x,
+                            top: intersectionRect.y,
+                            width:intersectionRect.width-2,
+                            height: intersectionRect.height-2,
+                            border:'1px solid yellow',
+                            overflow: 'hidden',
                         }}>
+                            <div style={{
+                                width:boundingClientRect.width-2,
+                                height: boundingClientRect.height-2,
+                                border:'1px solid red'
+                            }}>
 
+                            </div>
                         </div>,
                         document.body)
                 }
