@@ -29,7 +29,7 @@ All rights reserved.
         output: {
             path: path.join(__dirname, '../../dist'),
             filename: name,
-            library: 'HandlerFragment',
+            library: 'PositionObserver',
             libraryTarget: 'umd'
         },
         resolve: {
@@ -112,10 +112,10 @@ module.exports =function(){
         done()
     });
     gulp.task('webpack', (done) => {
-        webpackCompile(false,'handler-fragment.js',done)
+        webpackCompile(false,'position-observer.js',done)
     });
     gulp.task('minimize', (done) => {
-        webpackCompile(true,'handler-fragment.min.js',done)
+        webpackCompile(true,'position-observer.min.js',done)
     });
     gulp.task(
         'unpkg',

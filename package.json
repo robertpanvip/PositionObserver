@@ -1,8 +1,8 @@
 {
-    "name": "handler-fragment",
-    "version": "1.0.6",
-    "description": "The 'Handler' Component is like React.Fragment and you can add React composite events and you can get a DOM reference by ref",
-    "unpkg": "dist/handler-fragment.min.js",
+    "name": "position-observer",
+    "version": "0.0.1",
+    "description": "观察dom元素的位置信息以及是否可见等信息",
+    "unpkg": "dist/position-observer.min.js",
     "main": "lib/index",
     "module": "es/index",
     "typings": "lib/index.d.ts",
@@ -13,25 +13,20 @@
         "build": "cd build/scripts &&node index.js compile",
         "unpkg": "cd build/scripts &&node index.js unpkg",
         "publishNPM": "cd build/scripts &&node index.js publish",
-        "doc": "typedoc src/index.tsx"
+        "doc": "typedoc src/index.ts"
     },
-    "homepage": "https://github.com/robertpanvip/handler-fragment.git",
+    "homepage": "https://github.com/robertpanvip/position-observer.git",
     "repository": {
         "type": "git",
-        "url": "https://github.com/robertpanvip/handler-fragment.git"
+        "url": "https://github.com/robertpanvip/position-observer.git"
     },
     "bugs": {
-        "url": "https://github.com/robertpanvip/handler-fragment/issues"
+        "url": "https://github.com/robertpanvip/position-observer/issues"
     },
     "sideEffects": false,
     "keywords": [
-        "handler",
-        "focus-within",
-        "outside-click",
-        "fragment",
-        "event-fragment",
-        "ref",
-        "findDOMNode"
+        "Position Observer",
+        "Intersection Observer"
     ],
     "files": [
         "dist",

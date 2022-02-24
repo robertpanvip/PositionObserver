@@ -1,2 +1,2 @@
-import Handler from './PositionObserver';
-export default Handler;
+import PositionObserver from './PositionObserver';
+export default PositionObserver;
