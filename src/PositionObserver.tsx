@@ -57,8 +57,16 @@ class PositionObserverEntry {
     readonly boundingClientRect: DOMRectReadOnly;
     /** 目标元素 **/
     readonly target: Element;
+
     /** 相交区域和目标元素的比例值 **/
     readonly intersectionRatio: number;
+
+    /** 触发元素 **/
+    origin: EventTarget;
+
+    /**可视视窗区域 **/
+    parentIntersectionRect: IntersectionRect;
+
     /** 目标元素和视窗（根）相交的矩形信息 可以称为相交区域 **/
     intersectionRect: IntersectionRect;
 
@@ -85,6 +93,18 @@ class PositionObserverEntry {
                 return this.intersectionRatio !== 0;
             }
         })
+    }
+}
+
+function getLatestVisibleElement(target: Element): Element {
+    if (target instanceof HTMLHtmlElement) {
+        return target;
+    }
+    let parentNode = target.parentNode as Element;
+    if (parentNode.scrollHeight !== parentNode.clientHeight) {
+        return parentNode;
+    } else {
+        return getLatestVisibleElement(parentNode)
     }
 }
 
@@ -140,8 +160,23 @@ function loopGetRect(target: Element, targetRect: DOMRect): DOMRect {
     }
 }
 
-function getIntersectionRect(target:Element, targetRect:DOMRect) {
-    //const targetRect = target.getBoundingClientRect();
+function getOriginRect(origin: EventTarget): IntersectionRect {
+    return origin instanceof Element ? origin.getBoundingClientRect() : {
+        left: 0,
+        right: window.innerWidth,
+        top: 0,
+        bottom: window.innerHeight,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        x: 0,
+        y: window.innerHeight,
+        toJSON() {
+            return JSON.stringify(this)
+        }
+    }
+}
+
+function getIntersectionRect(target: Element, targetRect: DOMRect) {
     const left = targetRect.left
     const top = targetRect.top
     const width = targetRect.width
@@ -151,54 +186,71 @@ function getIntersectionRect(target:Element, targetRect:DOMRect) {
     return loopGetRect(target, _targetRect);
 }
 
-function getTooltipRectRect(targetRect: DOMRect, intersectionRect: IntersectionRect, init: PositionObserverInit) {
-    const tooltipRect:any = {
-        right: intersectionRect.right + 200,
+function getTooltipRectRect(scrollRect: IntersectionRect, targetRect: DOMRect, intersectionRect: IntersectionRect, init: PositionObserverInit) {
+    const targetMargin = init.targetMargin;
+    const tooltipRect: any = {
+        right: intersectionRect.right + targetMargin[1],
         left: intersectionRect.right,
-        top: intersectionRect.top - 50,
+        top: intersectionRect.top - targetMargin[0],
         bottom: intersectionRect.top,
-        height: 50,
-        width: 200,
+        height: targetMargin[0],
+        width: targetMargin[1],
         x: intersectionRect.right,
-        y: intersectionRect.top - 50,
+        y: intersectionRect.top - targetMargin[0],
     }
-    const diffTop = intersectionRect.top - targetRect.top
-    if (diffTop > 0 && diffTop <= 50) {
-        tooltipRect.height = 50 - diffTop;
-        tooltipRect.top = intersectionRect.top-50+ diffTop
-    } else if (diffTop > 50) {
-        tooltipRect.height = 0;
-        tooltipRect.top = intersectionRect.top
+    const diffTop = intersectionRect.top - scrollRect.top;
+    const diffRight = scrollRect.right-intersectionRect.right;
+
+    if (diffTop >= 0 && diffTop <= targetMargin[0]) {
+        tooltipRect.height = diffTop;
+        tooltipRect.top = intersectionRect.top - diffTop
     }
 
-    if (intersectionRect.height < 0 && intersectionRect.height >= -50) {
-        tooltipRect.height = 50 - Math.abs(intersectionRect.height)
-    } else if (intersectionRect.height < -50) {
+    if(diffRight>=0 && diffRight <= targetMargin[1]){
+        tooltipRect.width = diffRight;
+    }
+
+    if(intersectionRect.width<0){
+        tooltipRect.width = targetMargin[1] - Math.abs(intersectionRect.width)
+    }
+
+    if (intersectionRect.height < 0 && intersectionRect.height >= -targetMargin[0]) {
+        tooltipRect.height = targetMargin[0] - Math.abs(intersectionRect.height)
+    } else if (intersectionRect.height < -targetMargin[0]) {
         tooltipRect.height = 0;
-        tooltipRect.top = intersectionRect.top-50
+        tooltipRect.top = scrollRect.bottom
     }
     return tooltipRect
 }
+
+const defaultMargin: [number, number, number, number] = [0, 0, 0, 0]
 
 class PositionObserverSUP {
     private readonly callback: PositionObserverCallback;
     private vm = new Map<Element, PositionObserverEntry>();
     // @ts-ignore
     private resizeObserver: ResizeObserver;
-    private init: PositionObserverInit = {
-        targetMargin: [0, 0, 0, 0]
-    }
+    private readonly init: PositionObserverInit = {targetMargin: [0, 0, 0, 0]}
 
-    constructor(callback: PositionObserverCallback, init: PositionObserverInit) {
+    constructor(callback: PositionObserverCallback, init?: PositionObserverInit) {
         this.callback = callback;
-        this.init = init;
+        if (init) {
+            this.init = {
+                targetMargin: init.targetMargin || defaultMargin
+            }
+        }
         // @ts-ignore
         this.resizeObserver = ResizeObserver && new ResizeObserver((entries) => {
             entries.forEach((entry: PositionObserverEntry) => {
                 const en = this.vm.get(entry.target);
+                const latestElement = getLatestVisibleElement(entry.target);
+                const latestRect = latestElement.getBoundingClientRect();
                 const targetRect = entry.target.getBoundingClientRect();
-                en.intersectionRect = getIntersectionRect(entry.target,targetRect);
-                en.tooltipRect = getTooltipRectRect(targetRect, en.intersectionRect, this.init)
+                //en.parentIntersectionRect = getOriginRect(latestElement);
+                en.parentIntersectionRect = getIntersectionRect(latestElement, latestRect);
+                en.intersectionRect = getRectByStrategy(en.parentIntersectionRect, targetRect)
+                //en.intersectionRect = getIntersectionRect(entry.target, targetRect);
+                en.tooltipRect = getTooltipRectRect(en.parentIntersectionRect, targetRect, en.intersectionRect, this.init)
             })
             this.callback(getEntries(this.vm), this)
         })
@@ -217,17 +269,22 @@ class PositionObserverSUP {
             if (item.parentNode) {
                 const styles = getComputedStyle(item);
                 const addEventListener = (ele: Element | Window) => {
-                    ele.addEventListener('scroll', () => {
+                    ele.addEventListener('scroll', (e) => {
 
                         const targetRect = entry.target.getBoundingClientRect();
-                        entry.intersectionRect = getIntersectionRect(target,targetRect);
-                        entry.tooltipRect = getTooltipRectRect(targetRect, entry.intersectionRect, this.init)
+                        const latestElement = getLatestVisibleElement(target);
+                        const latestRect = latestElement.getBoundingClientRect();
+                        entry.origin = e.target;
+                        //entry.parentIntersectionRect = getOriginRect(latestElement);
+                        entry.parentIntersectionRect = getIntersectionRect(latestElement, latestRect);
+                        entry.intersectionRect = getRectByStrategy(entry.parentIntersectionRect, targetRect)
+
+                        //entry.intersectionRect = getIntersectionRect(target, targetRect);
+                        entry.tooltipRect = getTooltipRectRect(entry.parentIntersectionRect, targetRect, entry.intersectionRect, this.init)
 
                         requestAnimationFrame(() => {
                             this.callback(getEntries(this.vm), this)
                         })
-
-
                     })
                 }
                 if (['auto', 'scroll'].includes(styles.overflow)) {

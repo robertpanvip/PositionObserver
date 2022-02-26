@@ -47,16 +47,13 @@ class Test extends React.Component {
         const {boundingClientRect, intersectionRect, intersectionRatio, isIntersecting,tooltipRect} = this.state.entry;
 
         if (boundingClientRect && intersectionRect) {
-           // console.log('intersectionRect',intersectionRect);
+            // console.log('intersectionRect',intersectionRect);
         }
         return (
-            <div style={{height: 800, width: 500, marginTop: 200, overflow: 'auto', border: '1px solid red'}}>
+            <div style={{height: 800, width: 400, marginTop: 100,marginLeft:100, overflow: 'auto', border: '1px solid pink'}}>
+            <div id={'wrapper'} style={{height: 800, width: 500, marginTop: 200, overflow: 'auto', border: '1px solid red'}}>
                 <div ref={this.ref2} style={{height: 0}}>123</div>
-               {/* <div style={{overflow: 'scroll',height:600,width:200}}>
-                    <div style={{height:200}}></div>
-
-                </div>*/}
-                <div id={'ww'} style={{overflow: 'scroll',position:'relative'}}>
+                <div id={'ww'} style={{overflow: 'scroll',position:'relative',width:1200}}>
                     <div style={{height:1000}}>
 
                     </div>
@@ -73,40 +70,10 @@ class Test extends React.Component {
                         }}>
                         123
                     </div>
-
-                   {/* <div style={{
-                        overflow: 'scroll',
-                        position:'relative',
-                        marginLeft: 100,
-                        border: '1px solid red',
-                        //height: 200,
-                    }}>
-
-                        <div style={{height:50}}>
-
-                        </div>
-                        <div style={{overflow: 'auto',whiteSpace: 'nowrap'}}>
-                            <div
-                                ref={this.ref}
-                                id={'ge'}
-                                style={{
-                                    position:'absolute',
-                                    overflow: 'inherit',
-                                    //top:0,
-                                    width: 300,
-                                    height: 200,
-
-                                    border: '1px solid green'
-                                }}>
-                                123
-                            </div>
-                            <div style={{width:200,height:250,display:'inline-block'}}>
-
-                            </div>
-                        </div>
-
-                    </div>*/}
                 </div>
+
+            </div>
+                <div style={{height:800}}></div>
                 {
                     boundingClientRect && intersectionRect &&createPortal(
                         <div
@@ -125,7 +92,8 @@ class Test extends React.Component {
                                     width: 200,
                                     height: 50,
                                     border: '1px solid red',
-                                    marginTop:boundingClientRect.top-intersectionRect.top,
+                                    marginTop:(tooltipRect.height-50),
+                                    marginLeft:(tooltipRect.width-200),
                                 }}
                             >
                                 12345678
