@@ -44,13 +44,13 @@ class Test extends React.Component {
      *
      */
     render() {
-        const {boundingClientRect, intersectionRect, intersectionRatio, isIntersecting,tooltipRect} = this.state.entry;
+        const {boundingClientRect, intersectionRect, intersectionRatio, isIntersecting,tooltipRect,parentIntersectionRect} = this.state.entry;
 
         if (boundingClientRect && intersectionRect) {
             // console.log('intersectionRect',intersectionRect);
         }
         return (
-            <div style={{height: 800, width: 400, marginTop: 100,marginLeft:100, overflow: 'auto', border: '1px solid pink'}}>
+            <div style={{height: 800, width:317, marginTop: 100,marginLeft:100, overflow: 'auto', border: '1px solid pink'}}>
             <div id={'wrapper'} style={{height: 800, width: 500, marginTop: 200, overflow: 'auto', border: '1px solid red'}}>
                 <div ref={this.ref2} style={{height: 0}}>123</div>
                 <div id={'ww'} style={{overflow: 'scroll',position:'relative',width:1200}}>
@@ -83,17 +83,39 @@ class Test extends React.Component {
                                 top: tooltipRect.top,
                                 height: tooltipRect.height,
                                 width: tooltipRect.width,
-                                border: '1px solid yellow',
+                                //border: '1px solid yellow',
                                 overflow: 'hidden',
                             }}
                         >
                             <div
                                 style={{
-                                    width: 200,
-                                    height: 50,
+                                    position: 'fixed',
+                                    left: intersectionRect.left,
+                                    top: intersectionRect.top,
+                                    height: intersectionRect.height-17,
+                                    width: intersectionRect.width-17,
+                                    border: '1px solid black',
+                                    overflow: 'hidden',
+                                }}
+                            ></div>
+                            <div
+                                style={{
+                                    position: 'fixed',
+                                    left: parentIntersectionRect.left,
+                                    top: parentIntersectionRect.top,
+                                    height: parentIntersectionRect.height-17,
+                                    width: parentIntersectionRect.width-17,
+                                    border: '1px solid yellow',
+                                    overflow: 'hidden',
+                                }}
+                            ></div>
+                            <div
+                                style={{
+                                    //width: 200,
+                                    height: 48,
                                     border: '1px solid red',
-                                    marginTop:(tooltipRect.height-50),
-                                    marginLeft:(tooltipRect.width-200),
+                                    marginTop:(parentIntersectionRect.bottom-tooltipRect.top)<=50?0:(tooltipRect.height-50),
+                                    marginLeft:(tooltipRect.width-199),
                                 }}
                             >
                                 12345678

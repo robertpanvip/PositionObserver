@@ -186,7 +186,7 @@ function getIntersectionRect(target: Element, targetRect: DOMRect) {
     return loopGetRect(target, _targetRect);
 }
 
-function getTooltipRectRect(scrollRect: IntersectionRect, targetRect: DOMRect, intersectionRect: IntersectionRect, init: PositionObserverInit) {
+function getTooltipRect(scrollRect: IntersectionRect, targetRect: DOMRect, intersectionRect: IntersectionRect, init: PositionObserverInit) {
     const targetMargin = init.targetMargin;
     const tooltipRect: any = {
         right: intersectionRect.right + targetMargin[1],
@@ -206,6 +206,10 @@ function getTooltipRectRect(scrollRect: IntersectionRect, targetRect: DOMRect, i
         tooltipRect.top = intersectionRect.top - diffTop
     }
 
+    if(diffTop>=scrollRect.height){
+        tooltipRect.height = targetMargin[0]-(diffTop-scrollRect.height);
+    }
+
     if(diffRight>=0 && diffRight <= targetMargin[1]){
         tooltipRect.width = diffRight;
     }
@@ -214,9 +218,7 @@ function getTooltipRectRect(scrollRect: IntersectionRect, targetRect: DOMRect, i
         tooltipRect.width = targetMargin[1] - Math.abs(intersectionRect.width)
     }
 
-    if (intersectionRect.height < 0 && intersectionRect.height >= -targetMargin[0]) {
-        tooltipRect.height = targetMargin[0] - Math.abs(intersectionRect.height)
-    } else if (intersectionRect.height < -targetMargin[0]) {
+    if (intersectionRect.height < -targetMargin[0]) {
         tooltipRect.height = 0;
         tooltipRect.top = scrollRect.bottom
     }
@@ -250,7 +252,7 @@ class PositionObserverSUP {
                 en.parentIntersectionRect = getIntersectionRect(latestElement, latestRect);
                 en.intersectionRect = getRectByStrategy(en.parentIntersectionRect, targetRect)
                 //en.intersectionRect = getIntersectionRect(entry.target, targetRect);
-                en.tooltipRect = getTooltipRectRect(en.parentIntersectionRect, targetRect, en.intersectionRect, this.init)
+                en.tooltipRect = getTooltipRect(en.parentIntersectionRect, targetRect, en.intersectionRect, this.init)
             })
             this.callback(getEntries(this.vm), this)
         })
@@ -280,7 +282,7 @@ class PositionObserverSUP {
                         entry.intersectionRect = getRectByStrategy(entry.parentIntersectionRect, targetRect)
 
                         //entry.intersectionRect = getIntersectionRect(target, targetRect);
-                        entry.tooltipRect = getTooltipRectRect(entry.parentIntersectionRect, targetRect, entry.intersectionRect, this.init)
+                        entry.tooltipRect = getTooltipRect(entry.parentIntersectionRect, targetRect, entry.intersectionRect, this.init)
 
                         requestAnimationFrame(() => {
                             this.callback(getEntries(this.vm), this)
