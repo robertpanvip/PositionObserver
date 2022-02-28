@@ -20,7 +20,7 @@ Constructors
 
 *   new default(callback: PositionObserverCallback): [default](default.html)
 
-*   *   Defined in [PositionObserver.tsx:159](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L159)
+*   *   Defined in [PositionObserver.ts:159](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L159)
 
     #### Parameters
 
@@ -37,7 +37,7 @@ Methods
 
 *   disconnect(): void
 
-*   *   Defined in [PositionObserver.tsx:174](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L174)
+*   *   Defined in [PositionObserver.ts:174](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L174)
 
     对象停止监听工作
 
@@ -48,7 +48,7 @@ Methods
 
 *   observe(target: Element): void
 
-*   *   Defined in [PositionObserver.tsx:182](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L182)
+*   *   Defined in [PositionObserver.ts:182](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L182)
 
     开始监听一个目标元素
 
@@ -64,7 +64,7 @@ Methods
 
 *   unobserve(target: Element): void
 
-*   *   Defined in [PositionObserver.tsx:190](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L190)
+*   *   Defined in [PositionObserver.ts:190](https://github.com/robertpanvip/position-observer/blob/b581d77/src/PositionObserver.tsx#L190)
 
     停止监听特定目标元素
 

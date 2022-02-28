@@ -149,7 +149,11 @@ function getRectByStrategy(ViewReact: StrategyRect, targetRect: StrategyRect) {
  */
 function loopGetRect(target: Element, targetRect: DOMRect): DOMRect {
     const parent = getRelativeParentElement(target) as Element;
-    const parentRect = parent.getBoundingClientRect();
+
+    const parentRect = getOriginRect(parent);
+    if (!(parent instanceof Element)) {
+        return parentRect
+    }
 
     const intersectionRect = getRectByStrategy(parentRect, targetRect)
 
@@ -199,22 +203,22 @@ function getTooltipRect(scrollRect: IntersectionRect, targetRect: DOMRect, inter
         y: intersectionRect.top - targetMargin[0],
     }
     const diffTop = intersectionRect.top - scrollRect.top;
-    const diffRight = scrollRect.right-intersectionRect.right;
+    const diffRight = scrollRect.right - intersectionRect.right;
 
     if (diffTop >= 0 && diffTop <= targetMargin[0]) {
         tooltipRect.height = diffTop;
         tooltipRect.top = intersectionRect.top - diffTop
     }
 
-    if(diffTop>=scrollRect.height){
-        tooltipRect.height = targetMargin[0]-(diffTop-scrollRect.height);
+    if (diffTop >= scrollRect.height) {
+        tooltipRect.height = targetMargin[0] - (diffTop - scrollRect.height);
     }
 
-    if(diffRight>=0 && diffRight <= targetMargin[1]){
+    if (diffRight >= 0 && diffRight <= targetMargin[1]) {
         tooltipRect.width = diffRight;
     }
 
-    if(intersectionRect.width<0){
+    if (intersectionRect.width < 0) {
         tooltipRect.width = targetMargin[1] - Math.abs(intersectionRect.width)
     }
 
@@ -248,11 +252,13 @@ class PositionObserverSUP {
                 const latestElement = getLatestVisibleElement(entry.target);
                 const latestRect = latestElement.getBoundingClientRect();
                 const targetRect = entry.target.getBoundingClientRect();
-                //en.parentIntersectionRect = getOriginRect(latestElement);
+
                 en.parentIntersectionRect = getIntersectionRect(latestElement, latestRect);
+
                 en.intersectionRect = getRectByStrategy(en.parentIntersectionRect, targetRect)
-                //en.intersectionRect = getIntersectionRect(entry.target, targetRect);
+
                 en.tooltipRect = getTooltipRect(en.parentIntersectionRect, targetRect, en.intersectionRect, this.init)
+
             })
             this.callback(getEntries(this.vm), this)
         })
@@ -276,12 +282,11 @@ class PositionObserverSUP {
                         const targetRect = entry.target.getBoundingClientRect();
                         const latestElement = getLatestVisibleElement(target);
                         const latestRect = latestElement.getBoundingClientRect();
+
                         entry.origin = e.target;
-                        //entry.parentIntersectionRect = getOriginRect(latestElement);
                         entry.parentIntersectionRect = getIntersectionRect(latestElement, latestRect);
                         entry.intersectionRect = getRectByStrategy(entry.parentIntersectionRect, targetRect)
 
-                        //entry.intersectionRect = getIntersectionRect(target, targetRect);
                         entry.tooltipRect = getTooltipRect(entry.parentIntersectionRect, targetRect, entry.intersectionRect, this.init)
 
                         requestAnimationFrame(() => {
